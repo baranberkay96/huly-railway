@@ -1,0 +1,1060 @@
+{
+  "name": "Huly v0.7 All-in-One Team Workspace",
+  "description": "Projects, chat and docs in one app. Open-source Linear + Slack alternative.",
+  "category": "Other",
+  "tags": [
+    "huly",
+    "project-management",
+    "issue-tracker",
+    "team-chat",
+    "documents",
+    "linear-alternative",
+    "slack-alternative"
+  ],
+  "image": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+  "upstream": {
+    "repo": "hcengineering/huly-selfhost",
+    "version": "v0.7.426",
+    "checked": "2026-10-11"
+  },
+  "services": {
+    "proxy": {
+      "icon": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/caddy.svg",
+      "source": {
+        "repo": "baranberkay96/huly-railway",
+        "rootDirectory": "/services/proxy"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": "/_healthz",
+      "healthcheckTimeout": 300,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": true,
+      "targetPort": 8080,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "PORT": {
+          "defaultValue": "8080",
+          "description": "Port Caddy listens on; Railway routes the public domain and its healthcheck here.",
+          "required": false
+        },
+        "FRONT_HOST": {
+          "defaultValue": "${{front.RAILWAY_PRIVATE_DOMAIN}}:8080",
+          "description": "Front server.",
+          "required": false
+        },
+        "ACCOUNT_HOST": {
+          "defaultValue": "${{account.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Account service (/_accounts).",
+          "required": false
+        },
+        "TRANSACTOR_HOST": {
+          "defaultValue": "${{transactor.RAILWAY_PRIVATE_DOMAIN}}:3333",
+          "description": "Transactor (/_transactor and /eyJ… websockets).",
+          "required": false
+        },
+        "COLLABORATOR_HOST": {
+          "defaultValue": "${{collaborator.RAILWAY_PRIVATE_DOMAIN}}:3078",
+          "description": "Collaborator (/_collaborator).",
+          "required": false
+        },
+        "REKONI_HOST": {
+          "defaultValue": "${{rekoni.RAILWAY_PRIVATE_DOMAIN}}:4004",
+          "description": "Rekoni (/_rekoni).",
+          "required": false
+        },
+        "STATS_HOST": {
+          "defaultValue": "${{stats.RAILWAY_PRIVATE_DOMAIN}}:4900",
+          "description": "Stats (/_stats).",
+          "required": false
+        },
+        "PULSE_HOST": {
+          "defaultValue": "${{hulypulse.RAILWAY_PRIVATE_DOMAIN}}:8099",
+          "description": "HulyPulse (/_pulse -> /ws).",
+          "required": false
+        },
+        "MAX_UPLOAD_SIZE": {
+          "defaultValue": "100MB",
+          "description": "Maximum request body (upstream nginx: 100M).",
+          "required": false
+        }
+      }
+    },
+    "front": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "image": "hardcoreeng/front:v0.7.426"
+      },
+      "startCommand": "/bin/sh -c 'q() { node -p \"encodeURIComponent(process.argv[1])\" \"$1\"; }; export STORAGE_CONFIG=\"s3|$S3_ENDPOINT?accessKey=$(q \"$S3_ACCESS_KEY\")&secretKey=$(q \"$S3_SECRET_KEY\")&region=$(q \"$S3_REGION\")&rootBucket=$(q \"$S3_BUCKET\")&allowPresign=false\"; exec node ./bundle.js'",
+      "preDeployCommand": null,
+      "healthcheckPath": "/",
+      "healthcheckTimeout": 900,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "PORT": {
+          "defaultValue": "8080",
+          "description": "Port the front server listens on; Railway's healthcheck probes it.",
+          "required": false
+        },
+        "SERVER_PORT": {
+          "defaultValue": "8080",
+          "description": "Front server port.",
+          "required": false
+        },
+        "SERVER_SECRET": {
+          "defaultValue": "${{transactor.SERVER_SECRET}}",
+          "description": "Shared Huly server secret (signs tokens between services).",
+          "required": false
+        },
+        "ACCOUNTS_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_accounts",
+          "description": "Public account service URL (used by browsers).",
+          "required": false
+        },
+        "ACCOUNTS_URL_INTERNAL": {
+          "defaultValue": "http://${{account.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Account service (private network).",
+          "required": false
+        },
+        "REKONI_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_rekoni",
+          "description": "Public Rekoni URL.",
+          "required": false
+        },
+        "CALENDAR_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_calendar",
+          "description": "Calendar integration URL (service not included; as upstream).",
+          "required": false
+        },
+        "GMAIL_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_gmail",
+          "description": "Gmail integration URL (service not included; as upstream).",
+          "required": false
+        },
+        "TELEGRAM_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_telegram",
+          "description": "Telegram integration URL (service not included; as upstream).",
+          "required": false
+        },
+        "STATS_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_stats",
+          "description": "Public stats URL.",
+          "required": false
+        },
+        "UPLOAD_URL": {
+          "defaultValue": "/files",
+          "description": "Upload path served by front.",
+          "required": false
+        },
+        "ELASTIC_URL": {
+          "defaultValue": "http://elastic:${{elastic.ELASTIC_PASSWORD}}@${{elastic.RAILWAY_PRIVATE_DOMAIN}}:9200",
+          "description": "Elasticsearch (private network).",
+          "required": false
+        },
+        "COLLABORATOR_URL": {
+          "defaultValue": "wss://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_collaborator",
+          "description": "Public collaborator websocket URL.",
+          "required": false
+        },
+        "PULSE_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_pulse",
+          "description": "Public HulyPulse URL.",
+          "required": false
+        },
+        "TITLE": {
+          "defaultValue": "Huly",
+          "description": "Browser title of your instance.",
+          "required": false
+        },
+        "DEFAULT_LANGUAGE": {
+          "defaultValue": "en",
+          "description": "Default UI language.",
+          "required": false
+        },
+        "LAST_NAME_FIRST": {
+          "defaultValue": "true",
+          "description": "Show people as 'Last First' (upstream default).",
+          "required": false
+        },
+        "DESKTOP_UPDATES_CHANNEL": {
+          "defaultValue": "0.7.426",
+          "description": "Desktop app update channel; keep equal to the server version without 'v'.",
+          "required": false
+        },
+        "DISABLED_FEATURES": {
+          "defaultValue": "auto-translate,mailboxes",
+          "description": "Features that need services not included (as upstream).",
+          "required": false
+        },
+        "DISABLE_SIGNUP": {
+          "defaultValue": "${{account.DISABLE_SIGNUP}}",
+          "description": "Hide the sign-up form (follows the account service).",
+          "required": false
+        },
+        "S3_ENDPOINT": {
+          "defaultValue": "${{Bucket.ENDPOINT}}",
+          "description": "Railway Bucket S3 endpoint; the start command builds Huly's STORAGE_CONFIG from the S3_* variables (URL-encoded).",
+          "required": false
+        },
+        "S3_ACCESS_KEY": {
+          "defaultValue": "${{Bucket.ACCESS_KEY_ID}}",
+          "description": "Bucket access key.",
+          "required": false
+        },
+        "S3_SECRET_KEY": {
+          "defaultValue": "${{Bucket.SECRET_ACCESS_KEY}}",
+          "description": "Bucket secret key.",
+          "required": false
+        },
+        "S3_BUCKET": {
+          "defaultValue": "${{Bucket.BUCKET}}",
+          "description": "Bucket name; every workspace is a folder in it (rootBucket).",
+          "required": false
+        },
+        "S3_REGION": {
+          "defaultValue": "${{Bucket.REGION}}",
+          "description": "Bucket region.",
+          "required": false
+        }
+      }
+    },
+    "account": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "image": "hardcoreeng/account:v0.7.426"
+      },
+      "startCommand": "/bin/sh -c 'q() { node -p \"encodeURIComponent(process.argv[1])\" \"$1\"; }; export STORAGE_CONFIG=\"s3|$S3_ENDPOINT?accessKey=$(q \"$S3_ACCESS_KEY\")&secretKey=$(q \"$S3_SECRET_KEY\")&region=$(q \"$S3_REGION\")&rootBucket=$(q \"$S3_BUCKET\")&allowPresign=false\"; exec node bundle.js'",
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "SERVER_SECRET": {
+          "defaultValue": "${{transactor.SERVER_SECRET}}",
+          "description": "Shared Huly server secret (signs tokens between services).",
+          "required": false
+        },
+        "SERVER_PORT": {
+          "defaultValue": "3000",
+          "description": "Account service port.",
+          "required": false
+        },
+        "ACCOUNT_PORT": {
+          "defaultValue": "3000",
+          "description": "Account service port (same as SERVER_PORT).",
+          "required": false
+        },
+        "DB_URL": {
+          "defaultValue": "${{cockroach.DB_URL}}",
+          "description": "CockroachDB connection URL.",
+          "required": false
+        },
+        "TRANSACTOR_URL": {
+          "defaultValue": "ws://${{transactor.RAILWAY_PRIVATE_DOMAIN}}:3333;wss://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_transactor",
+          "description": "Transactor endpoints: internal for services, public for browsers.",
+          "required": false
+        },
+        "FRONT_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Public URL of Huly.",
+          "required": false
+        },
+        "STATS_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_stats",
+          "description": "Public stats URL (as upstream).",
+          "required": false
+        },
+        "ACCOUNTS_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_accounts",
+          "description": "Public account service URL.",
+          "required": false
+        },
+        "MODEL_ENABLED": {
+          "defaultValue": "*",
+          "description": "Enable all Huly modules.",
+          "required": false
+        },
+        "QUEUE_CONFIG": {
+          "defaultValue": "${{redpanda.RAILWAY_PRIVATE_DOMAIN}}:9092",
+          "description": "Redpanda (Kafka API) broker.",
+          "required": false
+        },
+        "DISABLE_SIGNUP": {
+          "defaultValue": "true",
+          "description": "Public sign-up off: the owner account is created by the init service; others join through invite links. Set false (here and on front) to allow open sign-up.",
+          "required": false
+        },
+        "S3_ENDPOINT": {
+          "defaultValue": "${{Bucket.ENDPOINT}}",
+          "description": "Railway Bucket S3 endpoint; the start command builds Huly's STORAGE_CONFIG from the S3_* variables (URL-encoded).",
+          "required": false
+        },
+        "S3_ACCESS_KEY": {
+          "defaultValue": "${{Bucket.ACCESS_KEY_ID}}",
+          "description": "Bucket access key.",
+          "required": false
+        },
+        "S3_SECRET_KEY": {
+          "defaultValue": "${{Bucket.SECRET_ACCESS_KEY}}",
+          "description": "Bucket secret key.",
+          "required": false
+        },
+        "S3_BUCKET": {
+          "defaultValue": "${{Bucket.BUCKET}}",
+          "description": "Bucket name; every workspace is a folder in it (rootBucket).",
+          "required": false
+        },
+        "S3_REGION": {
+          "defaultValue": "${{Bucket.REGION}}",
+          "description": "Bucket region.",
+          "required": false
+        }
+      }
+    },
+    "transactor": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "image": "hardcoreeng/transactor:v0.7.426"
+      },
+      "startCommand": "/bin/sh -c 'q() { node -p \"encodeURIComponent(process.argv[1])\" \"$1\"; }; export STORAGE_CONFIG=\"s3|$S3_ENDPOINT?accessKey=$(q \"$S3_ACCESS_KEY\")&secretKey=$(q \"$S3_SECRET_KEY\")&region=$(q \"$S3_REGION\")&rootBucket=$(q \"$S3_BUCKET\")&allowPresign=false\"; exec node ./bundle.js'",
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "SERVER_SECRET": {
+          "defaultValue": "${{secret(64, \"abcdef0123456789\")}}",
+          "description": "Shared Huly server secret (generated, like setup.sh's `openssl rand -hex 32`). The other services reference it.",
+          "required": false
+        },
+        "SERVER_PORT": {
+          "defaultValue": "3333",
+          "description": "Transactor port (websocket).",
+          "required": false
+        },
+        "DB_URL": {
+          "defaultValue": "${{cockroach.DB_URL}}",
+          "description": "CockroachDB connection URL.",
+          "required": false
+        },
+        "FRONT_URL": {
+          "defaultValue": "https://${{proxy.RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Public URL of Huly.",
+          "required": false
+        },
+        "ACCOUNTS_URL": {
+          "defaultValue": "http://${{account.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Account service (private network).",
+          "required": false
+        },
+        "FULLTEXT_URL": {
+          "defaultValue": "http://${{fulltext.RAILWAY_PRIVATE_DOMAIN}}:4700",
+          "description": "Fulltext service (private network).",
+          "required": false
+        },
+        "STATS_URL": {
+          "defaultValue": "http://${{stats.RAILWAY_PRIVATE_DOMAIN}}:4900",
+          "description": "Stats service (private network).",
+          "required": false
+        },
+        "QUEUE_CONFIG": {
+          "defaultValue": "${{redpanda.RAILWAY_PRIVATE_DOMAIN}}:9092",
+          "description": "Redpanda (Kafka API) broker.",
+          "required": false
+        },
+        "PULSE_URL": {
+          "defaultValue": "http://${{hulypulse.RAILWAY_PRIVATE_DOMAIN}}:8099",
+          "description": "HulyPulse (presence, typing indicators).",
+          "required": false
+        },
+        "LAST_NAME_FIRST": {
+          "defaultValue": "true",
+          "description": "Show people as 'Last First' (upstream default).",
+          "required": false
+        },
+        "S3_ENDPOINT": {
+          "defaultValue": "${{Bucket.ENDPOINT}}",
+          "description": "Railway Bucket S3 endpoint; the start command builds Huly's STORAGE_CONFIG from the S3_* variables (URL-encoded).",
+          "required": false
+        },
+        "S3_ACCESS_KEY": {
+          "defaultValue": "${{Bucket.ACCESS_KEY_ID}}",
+          "description": "Bucket access key.",
+          "required": false
+        },
+        "S3_SECRET_KEY": {
+          "defaultValue": "${{Bucket.SECRET_ACCESS_KEY}}",
+          "description": "Bucket secret key.",
+          "required": false
+        },
+        "S3_BUCKET": {
+          "defaultValue": "${{Bucket.BUCKET}}",
+          "description": "Bucket name; every workspace is a folder in it (rootBucket).",
+          "required": false
+        },
+        "S3_REGION": {
+          "defaultValue": "${{Bucket.REGION}}",
+          "description": "Bucket region.",
+          "required": false
+        }
+      }
+    },
+    "collaborator": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "image": "hardcoreeng/collaborator:v0.7.426"
+      },
+      "startCommand": "/bin/sh -c 'q() { node -p \"encodeURIComponent(process.argv[1])\" \"$1\"; }; export STORAGE_CONFIG=\"s3|$S3_ENDPOINT?accessKey=$(q \"$S3_ACCESS_KEY\")&secretKey=$(q \"$S3_SECRET_KEY\")&region=$(q \"$S3_REGION\")&rootBucket=$(q \"$S3_BUCKET\")&allowPresign=false\"; exec node bundle.js'",
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "SECRET": {
+          "defaultValue": "${{transactor.SERVER_SECRET}}",
+          "description": "Shared Huly server secret (signs tokens between services).",
+          "required": false
+        },
+        "COLLABORATOR_PORT": {
+          "defaultValue": "3078",
+          "description": "Collaborator port (websocket, Y.js documents).",
+          "required": false
+        },
+        "ACCOUNTS_URL": {
+          "defaultValue": "http://${{account.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Account service (private network).",
+          "required": false
+        },
+        "STATS_URL": {
+          "defaultValue": "http://${{stats.RAILWAY_PRIVATE_DOMAIN}}:4900",
+          "description": "Stats service (private network).",
+          "required": false
+        },
+        "S3_ENDPOINT": {
+          "defaultValue": "${{Bucket.ENDPOINT}}",
+          "description": "Railway Bucket S3 endpoint; the start command builds Huly's STORAGE_CONFIG from the S3_* variables (URL-encoded).",
+          "required": false
+        },
+        "S3_ACCESS_KEY": {
+          "defaultValue": "${{Bucket.ACCESS_KEY_ID}}",
+          "description": "Bucket access key.",
+          "required": false
+        },
+        "S3_SECRET_KEY": {
+          "defaultValue": "${{Bucket.SECRET_ACCESS_KEY}}",
+          "description": "Bucket secret key.",
+          "required": false
+        },
+        "S3_BUCKET": {
+          "defaultValue": "${{Bucket.BUCKET}}",
+          "description": "Bucket name; every workspace is a folder in it (rootBucket).",
+          "required": false
+        },
+        "S3_REGION": {
+          "defaultValue": "${{Bucket.REGION}}",
+          "description": "Bucket region.",
+          "required": false
+        }
+      }
+    },
+    "workspace": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "image": "hardcoreeng/workspace:v0.7.426"
+      },
+      "startCommand": "/bin/sh -c 'q() { node -p \"encodeURIComponent(process.argv[1])\" \"$1\"; }; export STORAGE_CONFIG=\"s3|$S3_ENDPOINT?accessKey=$(q \"$S3_ACCESS_KEY\")&secretKey=$(q \"$S3_SECRET_KEY\")&region=$(q \"$S3_REGION\")&rootBucket=$(q \"$S3_BUCKET\")&allowPresign=false\"; exec node bundle.js'",
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "SERVER_SECRET": {
+          "defaultValue": "${{transactor.SERVER_SECRET}}",
+          "description": "Shared Huly server secret (signs tokens between services).",
+          "required": false
+        },
+        "DB_URL": {
+          "defaultValue": "${{cockroach.DB_URL}}",
+          "description": "CockroachDB connection URL.",
+          "required": false
+        },
+        "ACCOUNTS_DB_URL": {
+          "defaultValue": "${{cockroach.DB_URL}}",
+          "description": "Account database (same CockroachDB).",
+          "required": false
+        },
+        "TRANSACTOR_URL": {
+          "defaultValue": "ws://${{transactor.RAILWAY_PRIVATE_DOMAIN}}:3333;wss://${{proxy.RAILWAY_PUBLIC_DOMAIN}}/_transactor",
+          "description": "Transactor endpoints: internal for services, public for browsers.",
+          "required": false
+        },
+        "MODEL_ENABLED": {
+          "defaultValue": "*",
+          "description": "Enable all Huly modules.",
+          "required": false
+        },
+        "ACCOUNTS_URL": {
+          "defaultValue": "http://${{account.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Account service (private network).",
+          "required": false
+        },
+        "STATS_URL": {
+          "defaultValue": "http://${{stats.RAILWAY_PRIVATE_DOMAIN}}:4900",
+          "description": "Stats service (private network).",
+          "required": false
+        },
+        "FULLTEXT_URL": {
+          "defaultValue": "http://${{fulltext.RAILWAY_PRIVATE_DOMAIN}}:4700",
+          "description": "Fulltext service, used to clean a workspace's search index when it is deleted.",
+          "required": false
+        },
+        "QUEUE_CONFIG": {
+          "defaultValue": "${{redpanda.RAILWAY_PRIVATE_DOMAIN}}:9092",
+          "description": "Redpanda (Kafka API) broker.",
+          "required": false
+        },
+        "S3_ENDPOINT": {
+          "defaultValue": "${{Bucket.ENDPOINT}}",
+          "description": "Railway Bucket S3 endpoint; the start command builds Huly's STORAGE_CONFIG from the S3_* variables (URL-encoded).",
+          "required": false
+        },
+        "S3_ACCESS_KEY": {
+          "defaultValue": "${{Bucket.ACCESS_KEY_ID}}",
+          "description": "Bucket access key.",
+          "required": false
+        },
+        "S3_SECRET_KEY": {
+          "defaultValue": "${{Bucket.SECRET_ACCESS_KEY}}",
+          "description": "Bucket secret key.",
+          "required": false
+        },
+        "S3_BUCKET": {
+          "defaultValue": "${{Bucket.BUCKET}}",
+          "description": "Bucket name; every workspace is a folder in it (rootBucket).",
+          "required": false
+        },
+        "S3_REGION": {
+          "defaultValue": "${{Bucket.REGION}}",
+          "description": "Bucket region.",
+          "required": false
+        }
+      }
+    },
+    "fulltext": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "image": "hardcoreeng/fulltext:v0.7.426"
+      },
+      "startCommand": "/bin/sh -c 'q() { node -p \"encodeURIComponent(process.argv[1])\" \"$1\"; }; export STORAGE_CONFIG=\"s3|$S3_ENDPOINT?accessKey=$(q \"$S3_ACCESS_KEY\")&secretKey=$(q \"$S3_SECRET_KEY\")&region=$(q \"$S3_REGION\")&rootBucket=$(q \"$S3_BUCKET\")&allowPresign=false\"; exec node --expose-gc bundle.js'",
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "SERVER_SECRET": {
+          "defaultValue": "${{transactor.SERVER_SECRET}}",
+          "description": "Shared Huly server secret (signs tokens between services).",
+          "required": false
+        },
+        "DB_URL": {
+          "defaultValue": "${{cockroach.DB_URL}}",
+          "description": "CockroachDB connection URL.",
+          "required": false
+        },
+        "FULLTEXT_DB_URL": {
+          "defaultValue": "http://elastic:${{elastic.ELASTIC_PASSWORD}}@${{elastic.RAILWAY_PRIVATE_DOMAIN}}:9200",
+          "description": "Elasticsearch with credentials (private network).",
+          "required": false
+        },
+        "ELASTIC_INDEX_NAME": {
+          "defaultValue": "huly_storage_index",
+          "description": "Search index name (upstream).",
+          "required": false
+        },
+        "REKONI_URL": {
+          "defaultValue": "http://${{rekoni.RAILWAY_PRIVATE_DOMAIN}}:4004",
+          "description": "Rekoni text extraction (private network).",
+          "required": false
+        },
+        "ACCOUNTS_URL": {
+          "defaultValue": "http://${{account.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Account service (private network).",
+          "required": false
+        },
+        "STATS_URL": {
+          "defaultValue": "http://${{stats.RAILWAY_PRIVATE_DOMAIN}}:4900",
+          "description": "Stats service (private network).",
+          "required": false
+        },
+        "QUEUE_CONFIG": {
+          "defaultValue": "${{redpanda.RAILWAY_PRIVATE_DOMAIN}}:9092",
+          "description": "Redpanda (Kafka API) broker.",
+          "required": false
+        },
+        "S3_ENDPOINT": {
+          "defaultValue": "${{Bucket.ENDPOINT}}",
+          "description": "Railway Bucket S3 endpoint; the start command builds Huly's STORAGE_CONFIG from the S3_* variables (URL-encoded).",
+          "required": false
+        },
+        "S3_ACCESS_KEY": {
+          "defaultValue": "${{Bucket.ACCESS_KEY_ID}}",
+          "description": "Bucket access key.",
+          "required": false
+        },
+        "S3_SECRET_KEY": {
+          "defaultValue": "${{Bucket.SECRET_ACCESS_KEY}}",
+          "description": "Bucket secret key.",
+          "required": false
+        },
+        "S3_BUCKET": {
+          "defaultValue": "${{Bucket.BUCKET}}",
+          "description": "Bucket name; every workspace is a folder in it (rootBucket).",
+          "required": false
+        },
+        "S3_REGION": {
+          "defaultValue": "${{Bucket.REGION}}",
+          "description": "Bucket region.",
+          "required": false
+        }
+      }
+    },
+    "rekoni": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "image": "hardcoreeng/rekoni-service:v0.7.426"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "SECRET": {
+          "defaultValue": "${{transactor.SERVER_SECRET}}",
+          "description": "Shared Huly server secret (signs tokens between services).",
+          "required": false
+        },
+        "PORT": {
+          "defaultValue": "4004",
+          "description": "Rekoni port.",
+          "required": false
+        }
+      }
+    },
+    "stats": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "image": "hardcoreeng/stats:v0.7.426"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "SERVER_SECRET": {
+          "defaultValue": "${{transactor.SERVER_SECRET}}",
+          "description": "Shared Huly server secret (signs tokens between services).",
+          "required": false
+        },
+        "PORT": {
+          "defaultValue": "4900",
+          "description": "Stats port.",
+          "required": false
+        }
+      }
+    },
+    "kvs": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "image": "hardcoreeng/hulykvs:v0.7.426"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "HULY_DB_CONNECTION": {
+          "defaultValue": "${{cockroach.DB_URL}}",
+          "description": "CockroachDB connection URL.",
+          "required": false
+        },
+        "HULY_TOKEN_SECRET": {
+          "defaultValue": "${{transactor.SERVER_SECRET}}",
+          "description": "Shared Huly server secret (signs tokens between services).",
+          "required": false
+        },
+        "HULY_BIND_HOST": {
+          "defaultValue": "::",
+          "description": "Listen on IPv4 and IPv6 (upstream default 0.0.0.0 is IPv4 only).",
+          "required": false
+        },
+        "HULY_BIND_PORT": {
+          "defaultValue": "8094",
+          "description": "KVS port.",
+          "required": false
+        }
+      }
+    },
+    "hulypulse": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "image": "hardcoreeng/service_hulypulse:0.1.29"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "restartPolicyMaxRetries": null,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "HULY_TOKEN_SECRET": {
+          "defaultValue": "${{transactor.SERVER_SECRET}}",
+          "description": "Shared Huly server secret (signs tokens between services).",
+          "required": false
+        },
+        "HULY_BIND_HOST": {
+          "defaultValue": "::",
+          "description": "Listen on IPv4 and IPv6.",
+          "required": false
+        },
+        "HULY_BIND_PORT": {
+          "defaultValue": "8099",
+          "description": "HulyPulse port.",
+          "required": false
+        },
+        "HULY_BACKEND": {
+          "defaultValue": "memory",
+          "description": "In-memory backend (upstream default for single-node installs; no Redis needed).",
+          "required": false
+        },
+        "HULY_HEARTBEAT_TIMEOUT": {
+          "defaultValue": "60",
+          "description": "Seconds before a silent websocket client is dropped.",
+          "required": false
+        },
+        "HULY_LOG": {
+          "defaultValue": "info",
+          "description": "Log level.",
+          "required": false
+        }
+      }
+    },
+    "init": {
+      "icon": "https://cdn.jsdelivr.net/gh/hcengineering/platform@v0.7.426/dev/prod/public/huly/icon-256.png",
+      "source": {
+        "repo": "baranberkay96/huly-railway",
+        "rootDirectory": "/services/init"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": null,
+      "variables": {
+        "HULY_OWNER_EMAIL": {
+          "defaultValue": "",
+          "description": "E-mail (login) of the owner account created on first deploy.",
+          "required": true
+        },
+        "HULY_OWNER_PASSWORD": {
+          "defaultValue": "${{secret(20, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Password of the owner account (generated; used once). Change it in Huly afterwards.",
+          "required": false
+        },
+        "HULY_OWNER_FIRST_NAME": {
+          "defaultValue": "Owner",
+          "description": "First name of the owner account.",
+          "required": false
+        },
+        "HULY_OWNER_LAST_NAME": {
+          "defaultValue": "Admin",
+          "description": "Last name of the owner account.",
+          "required": false
+        },
+        "SERVER_SECRET": {
+          "defaultValue": "${{transactor.SERVER_SECRET}}",
+          "description": "Shared Huly server secret (signs tokens between services).",
+          "required": false
+        },
+        "DB_URL": {
+          "defaultValue": "${{cockroach.DB_URL}}",
+          "description": "CockroachDB connection URL.",
+          "required": false
+        },
+        "ACCOUNT_DB_URL": {
+          "defaultValue": "${{cockroach.DB_URL}}",
+          "description": "Account database (same CockroachDB).",
+          "required": false
+        },
+        "ACCOUNTS_URL": {
+          "defaultValue": "http://${{account.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Account service (private network); the init waits for it.",
+          "required": false
+        }
+      }
+    },
+    "cockroach": {
+      "icon": "https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/cockroachlabs.svg",
+      "source": {
+        "repo": "baranberkay96/huly-railway",
+        "rootDirectory": "/services/cockroach"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/cockroach/persist"
+      },
+      "variables": {
+        "COCKROACH_DATABASE": {
+          "defaultValue": "defaultdb",
+          "description": "Database created on first start (huly-selfhost default).",
+          "required": false
+        },
+        "COCKROACH_USER": {
+          "defaultValue": "selfhost",
+          "description": "SQL user created on first start (huly-selfhost default).",
+          "required": false
+        },
+        "COCKROACH_PASSWORD": {
+          "defaultValue": "${{secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Password of the SQL user (generated).",
+          "required": false
+        },
+        "COCKROACH_CACHE": {
+          "defaultValue": "256MiB",
+          "description": "CockroachDB cache size (default would be 25% of the host's memory).",
+          "required": false
+        },
+        "COCKROACH_MAX_SQL_MEMORY": {
+          "defaultValue": "256MiB",
+          "description": "Memory for SQL query processing (default would be 25% of the host's memory).",
+          "required": false
+        },
+        "COCKROACH_LICENSE_KEY": {
+          "defaultValue": "",
+          "description": "Optional CockroachDB license key (the CockroachDB Software License requires one for production use; Cockroach Labs offers a free tier for qualifying companies). Applied as a cluster setting on start.",
+          "required": false
+        },
+        "COCKROACH_ORGANIZATION": {
+          "defaultValue": "",
+          "description": "Organization name the license key was issued to (cluster.organization).",
+          "required": false
+        },
+        "DB_URL": {
+          "defaultValue": "postgres://${{COCKROACH_USER}}:${{COCKROACH_PASSWORD}}@${{RAILWAY_PRIVATE_DOMAIN}}:26257/${{COCKROACH_DATABASE}}",
+          "description": "Connection URL the Huly services use (password auth over the private network, as upstream).",
+          "required": false
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "defaultValue": "60",
+          "description": "Allow a clean shutdown on redeploy.",
+          "required": false
+        }
+      }
+    },
+    "redpanda": {
+      "icon": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/kafka-light.svg",
+      "source": {
+        "image": "redpandadata/redpanda:v24.3.18"
+      },
+      "startCommand": "/bin/sh -c \"rm -rf /var/lib/redpanda/data/lost+found && exec rpk redpanda start --kafka-addr internal://[::]:9092 --advertise-kafka-addr internal://$RAILWAY_PRIVATE_DOMAIN:9092 --pandaproxy-addr internal://[::]:8082 --advertise-pandaproxy-addr internal://$RAILWAY_PRIVATE_DOMAIN:8082 --schema-registry-addr internal://[::]:8081 --rpc-addr 0.0.0.0:33145 --advertise-rpc-addr $RAILWAY_PRIVATE_DOMAIN:33145 --mode dev-container --smp 1 --memory $REDPANDA_MEMORY --reserve-memory 0M --default-log-level=info\"",
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/var/lib/redpanda/data"
+      },
+      "variables": {
+        "REDPANDA_MEMORY": {
+          "defaultValue": "1G",
+          "description": "Memory Redpanda allocates (Seastar would otherwise size itself to the host).",
+          "required": false
+        },
+        "RAILWAY_RUN_UID": {
+          "defaultValue": "0",
+          "description": "Run as root so Redpanda can write to the volume (mounted root-owned).",
+          "required": false
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "defaultValue": "30",
+          "description": "Allow a clean shutdown on redeploy.",
+          "required": false
+        }
+      }
+    },
+    "elastic": {
+      "icon": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/elasticsearch.svg",
+      "source": {
+        "repo": "baranberkay96/huly-railway",
+        "rootDirectory": "/services/elasticsearch"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10,
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/usr/share/elasticsearch/data"
+      },
+      "variables": {
+        "discovery.type": {
+          "defaultValue": "single-node",
+          "description": "Single-node cluster (also skips production bootstrap checks).",
+          "required": false
+        },
+        "xpack.security.enabled": {
+          "defaultValue": "true",
+          "description": "Require the elastic user's password (upstream runs without).",
+          "required": false
+        },
+        "ELASTIC_PASSWORD": {
+          "defaultValue": "${{secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Password of the elastic user (generated).",
+          "required": false
+        },
+        "ES_JAVA_OPTS": {
+          "defaultValue": "-Xms1g -Xmx1g",
+          "description": "JVM heap (upstream: 1 GB).",
+          "required": false
+        },
+        "network.host": {
+          "defaultValue": "0.0.0.0",
+          "description": "Bind address (Java listens dual-stack). 0.0.0.0, not '::': the image writes these settings to YAML unquoted and '::' breaks the parse.",
+          "required": false
+        },
+        "node.store.allow_mmap": {
+          "defaultValue": "false",
+          "description": "Do not depend on the host's vm.max_map_count, which containers cannot change.",
+          "required": false
+        },
+        "bootstrap.memory_lock": {
+          "defaultValue": "false",
+          "description": "memlock ulimits cannot be raised on Railway.",
+          "required": false
+        },
+        "ingest.geoip.downloader.enabled": {
+          "defaultValue": "false",
+          "description": "Skip GeoIP database downloads.",
+          "required": false
+        },
+        "xpack.ml.enabled": {
+          "defaultValue": "false",
+          "description": "Machine learning off (unused, saves memory).",
+          "required": false
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "defaultValue": "60",
+          "description": "Allow a clean shutdown on redeploy.",
+          "required": false
+        }
+      }
+    }
+  },
+  "buckets": [
+    "Bucket"
+  ]
+}

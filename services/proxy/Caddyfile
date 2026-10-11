@@ -1,0 +1,57 @@
+# Single public entry point for Huly on Railway.
+# Same routes as huly-selfhost's .huly.nginx: the UI at /, the backend services
+# under /_<service> with the prefix removed, transactor websockets also at /eyJ…
+# (connection URLs that start with a JWT), and HulyPulse at /_pulse -> /ws.
+# Upstreams are Railway private domains (host:port), resolved per connection.
+{
+	admin off
+	auto_https off
+	servers {
+		# Railway's edge and private network; keeps the client IP in X-Forwarded-For.
+		trusted_proxies static private_ranges 100.64.0.0/10
+	}
+}
+
+:{$PORT:8080} {
+	request_body {
+		max_size {$MAX_UPLOAD_SIZE:100MB}
+	}
+
+	handle /_healthz {
+		respond "ok" 200
+	}
+
+	handle_path /_accounts* {
+		reverse_proxy {$ACCOUNT_HOST}
+	}
+
+	handle_path /_collaborator* {
+		reverse_proxy {$COLLABORATOR_HOST}
+	}
+
+	handle_path /_transactor* {
+		reverse_proxy {$TRANSACTOR_HOST}
+	}
+
+	@transactor_token path_regexp ^/eyJ
+	handle @transactor_token {
+		reverse_proxy {$TRANSACTOR_HOST}
+	}
+
+	handle_path /_rekoni* {
+		reverse_proxy {$REKONI_HOST}
+	}
+
+	handle_path /_stats* {
+		reverse_proxy {$STATS_HOST}
+	}
+
+	handle /_pulse* {
+		uri replace /_pulse /ws 1
+		reverse_proxy {$PULSE_HOST}
+	}
+
+	handle {
+		reverse_proxy {$FRONT_HOST}
+	}
+}
