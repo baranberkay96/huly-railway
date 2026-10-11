@@ -4,6 +4,8 @@
 
 Huly is an open-source workspace that combines project tracking, team chat and collaborative documents, often compared to Linear, Slack and Notion. This community template deploys the full Huly v0.7 self-hosted stack on Railway behind one domain, with CockroachDB, Redpanda, Elasticsearch search, a Railway Bucket for files and an owner account created for you.
 
+> **License note:** this stack runs CockroachDB, which is distributed under the CockroachDB Software License. Production use requires a license key from Cockroach Labs (free tiers exist for some organizations), and telemetry cannot be disabled without one. Set `COCKROACH_LICENSE_KEY` and `COCKROACH_ORGANIZATION` after deploying. Review the license terms before using this template in production.
+
 ## About Hosting Huly
 
 Self-hosted Huly is a set of cooperating services: a front server for the web app, an account service, a transactor that handles every change over websockets, a collaborator for real-time document editing, a workspace service, full-text indexing with text extraction, and small stats, key-value and presence services. It stores data in CockroachDB, streams events through a Kafka-compatible broker, indexes content in Elasticsearch and keeps files in S3-compatible storage. This template runs each part as its own Railway service following the official huly-selfhost setup, routes everything through a Caddy proxy on one domain, stores files in a Railway Bucket, and closes public sign-up so only invited people can join.
