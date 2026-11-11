@@ -1,10 +1,10 @@
-# Huly v0.7 All-in-One Team Workspace — Railway template spec
+# Huly All-in-One Team Workspace — Railway template spec
 
 ## Listing
 
 | Field | Value |
 |---|---|
-| Name | **Huly v0.7 All-in-One Team Workspace** (version label `v0.7` = major.minor of a 0.x release, with Huly's own "v") |
+| Name | **Huly All-in-One Team Workspace** (version label `v0.7` = major.minor of a 0.x release, with Huly's own "v") |
 | Description | Projects, chat and docs in one app. Open-source Linear + Slack alternative. (75 chars) |
 | Category | Other |
 | Tags | huly, project-management, issue-tracker, team-chat, documents, linear-alternative, slack-alternative |

@@ -1,4 +1,4 @@
-# NOTICE — Huly v0.7 All-in-One Team Workspace
+# NOTICE — Huly All-in-One Team Workspace
 
 ## Software deployed (not redistributed)
 
